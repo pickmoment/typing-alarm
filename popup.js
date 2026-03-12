@@ -8,6 +8,9 @@ import {
 const STORAGE_KEY = "alarms";
 
 const timeInput = document.getElementById("timeInput");
+const advanceEnabled = document.getElementById("advanceEnabled");
+const advanceMinutes = document.getElementById("advanceMinutes");
+const advanceSeconds = document.getElementById("advanceSeconds");
 const addError = document.getElementById("addError");
 const listEl = document.getElementById("list");
 const template = document.getElementById("itemTemplate");
@@ -35,6 +38,7 @@ const SETTINGS_KEY = "alarmSettings";
 const QUICK_KEY = "quickPhrases";
 const QUICK_VERSION_KEY = "quickPhrasesVersion";
 const QUICK_VERSION = 2;
+const ADVANCE_KEY = "advanceReserveSettings";
 
 refreshBtn.addEventListener("click", () => loadAndRender());
 timeInput.focus();
@@ -78,9 +82,25 @@ quickAddBtn.addEventListener("click", async () => {
   quickHint.textContent = "";
 });
 
+advanceEnabled.addEventListener("change", async () => {
+  syncAdvanceInputsState();
+  await saveAdvanceSettings();
+});
+
+advanceMinutes.addEventListener("change", async () => {
+  advanceMinutes.value = normalizeAdvanceValue(advanceMinutes.value, 0, 180);
+  await saveAdvanceSettings();
+});
+
+advanceSeconds.addEventListener("change", async () => {
+  advanceSeconds.value = normalizeAdvanceValue(advanceSeconds.value, 0, 59);
+  await saveAdvanceSettings();
+});
+
 loadAndRender();
 loadAlarmBanner();
 loadSettings();
+loadAdvanceSettings();
 loadQuickPhrases().then(renderQuickPhrases);
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === "local" && changes[ACTIVE_KEY]) {
@@ -189,6 +209,7 @@ function render(items) {
       item.oneOffAt = parsed.absoluteAt ?? null;
       item.second = parsed.second ?? 0;
       item.hasSeconds = parsed.hasSeconds ?? false;
+      item.isRelativeInput = parsed.isRelative === true;
 
       if (parsed.absoluteAt) {
         item.repeat = "once";
@@ -336,7 +357,7 @@ function formatNextAt(item) {
   const time = next.toLocaleTimeString("ko-KR", {
     hour: "2-digit",
     minute: "2-digit",
-    second: item?.hasSeconds ? "2-digit" : undefined,
+    second: shouldDisplaySeconds(item) ? "2-digit" : undefined,
     hour12: false
   });
   return `${date} ${time}`;
@@ -406,16 +427,13 @@ async function rescheduleLocal(items) {
   await chrome.alarms.clearAll();
   const now = new Date();
   for (const item of items) {
-    if (item.oneOffAt && item.oneOffAt <= now.getTime()) {
-      item.enabled = false;
-      item.nextAt = null;
-      item.oneOffAt = null;
-      continue;
-    }
     const next = computeNextOccurrence(item, now);
     item.nextAt = next ? next.getTime() : null;
     if (item.nextAt) {
       chrome.alarms.create(`alarm:${item.id}`, { when: item.nextAt });
+    } else if (item.enabled !== false && item.oneOffAt) {
+      item.enabled = false;
+      item.oneOffAt = null;
     }
   }
   await saveItems(items);
@@ -423,6 +441,7 @@ async function rescheduleLocal(items) {
 
 async function addFromInputs(inputs) {
   const items = await loadItems();
+  const advanceConfig = getAdvanceConfigFromInputs();
   const invalid = [];
   const duplicates = [];
   let addedCount = 0;
@@ -440,6 +459,8 @@ async function addFromInputs(inputs) {
       continue;
     }
 
+    const shouldApplyAdvance = !parsed.isRelative && advanceConfig.enabled && advanceConfig.totalSeconds > 0;
+
     items.push({
       id: crypto.randomUUID(),
       raw: entry,
@@ -452,6 +473,9 @@ async function addFromInputs(inputs) {
       days: [],
       enabled: true,
       oneOffAt: parsed.absoluteAt ?? null,
+      leadEnabled: shouldApplyAdvance,
+      leadSeconds: shouldApplyAdvance ? advanceConfig.totalSeconds : 0,
+      isRelativeInput: parsed.isRelative === true,
       nextAt: null,
       lastFired: null,
       createdAt: Date.now()
@@ -549,6 +573,58 @@ async function verifyStoredItems(stored, metas) {
   }
 
   return false;
+}
+
+async function loadAdvanceSettings() {
+  const result = await chrome.storage.local.get(ADVANCE_KEY);
+  const raw = result[ADVANCE_KEY] || {};
+  const enabled = raw.enabled === true;
+  advanceEnabled.checked = enabled;
+  advanceMinutes.value = normalizeAdvanceValue(raw.minutes ?? 0, 0, 180);
+  advanceSeconds.value = normalizeAdvanceValue(raw.seconds ?? 0, 0, 59);
+  syncAdvanceInputsState();
+}
+
+async function saveAdvanceSettings() {
+  await chrome.storage.local.set({
+    [ADVANCE_KEY]: {
+      enabled: advanceEnabled.checked,
+      minutes: Number(advanceMinutes.value) || 0,
+      seconds: Number(advanceSeconds.value) || 0
+    }
+  });
+}
+
+function syncAdvanceInputsState() {
+  const enabled = advanceEnabled.checked;
+  advanceMinutes.disabled = !enabled;
+  advanceSeconds.disabled = !enabled;
+}
+
+function normalizeAdvanceValue(value, min, max) {
+  let n = Number(value);
+  if (!Number.isFinite(n)) n = min;
+  n = Math.floor(n);
+  if (n < min) n = min;
+  if (n > max) n = max;
+  return String(n);
+}
+
+function getAdvanceConfigFromInputs() {
+  const minutes = Number(advanceMinutes.value) || 0;
+  const seconds = Number(advanceSeconds.value) || 0;
+  return {
+    enabled: advanceEnabled.checked,
+    totalSeconds: Math.max(0, minutes * 60 + seconds)
+  };
+}
+
+function shouldDisplaySeconds(item) {
+  if (item?.hasSeconds) return true;
+  if (item?.isRelativeInput) return false;
+  if (item?.leadEnabled !== true) return false;
+  if (!Number.isFinite(item?.leadSeconds)) return false;
+  return item.leadSeconds % 60 !== 0;
 }
 
 

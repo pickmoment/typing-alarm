@@ -38,11 +38,25 @@
             <br />
             Enter: 추가 / Shift+Enter: 줄바꿈
             <br />
+            미리 예약: 지정 시간 입력에만 적용 (예: 09:30), 20분후 입력에는 미적용
+            <br />
             문구 등록: 입력 후 '문구 등록' 버튼 클릭
           </div>
         </div>
       </div>
       <textarea id="timeInput" rows="3" placeholder="예: 9, 09:30, 9:30am, 21, 930, 9시30분, 9:30:15, 93015, 20분후, 1분10초후, 1시간후, 내일 9시, 2/12 9:30"></textarea>
+      <div class="advance-panel">
+        <label class="advance-toggle">
+          <input id="advanceEnabled" type="checkbox" />
+          <span>지정 시간보다 미리 예약 적용</span>
+        </label>
+        <div class="advance-time">
+          <input id="advanceMinutes" type="number" min="0" max="180" step="1" value="0" />
+          <span>분</span>
+          <input id="advanceSeconds" type="number" min="0" max="59" step="1" value="0" />
+          <span>초</span>
+        </div>
+      </div>
       <div class="quick-panel">
         <div class="quick-header">
           <span class="hint">자주 쓰는 문구</span>

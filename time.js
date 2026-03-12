@@ -18,6 +18,7 @@ export function parseTimeString(input, now = new Date()) {
       minute: absoluteAt.getMinutes(),
       second: absoluteAt.getSeconds(),
       hasSeconds: true,
+      isRelative: true,
       normalized: `${String(absoluteAt.getHours()).padStart(2, "0")}:${String(
         absoluteAt.getMinutes()
       ).padStart(2, "0")}:${String(absoluteAt.getSeconds()).padStart(2, "0")}`,
@@ -31,7 +32,8 @@ export function parseTimeString(input, now = new Date()) {
   const clock = parseClockString(s);
   if (!clock) return null;
   return {
-    ...clock
+    ...clock,
+    isRelative: false
   };
 }
 
@@ -114,6 +116,7 @@ function parseDateBasedInput(input, now) {
 
   return {
     ...clock,
+    isRelative: false,
     absoluteAt: absoluteAt.getTime()
   };
 }
@@ -213,8 +216,9 @@ export function formatTime(hour, minute, second = null) {
 
 export function computeNextOccurrence(item, fromDate = new Date()) {
   if (!item.enabled) return null;
+  const leadMs = getLeadMs(item);
   if (item.oneOffAt) {
-    const target = new Date(item.oneOffAt);
+    const target = new Date(item.oneOffAt - leadMs);
     if (target > fromDate) return target;
     return null;
   }
@@ -223,7 +227,7 @@ export function computeNextOccurrence(item, fromDate = new Date()) {
 
   const from = new Date(fromDate.getTime());
   for (let i = 0; i <= 7; i += 1) {
-    const candidate = new Date(
+    const candidateTarget = new Date(
       from.getFullYear(),
       from.getMonth(),
       from.getDate() + i,
@@ -233,17 +237,28 @@ export function computeNextOccurrence(item, fromDate = new Date()) {
       0
     );
 
-    if (candidate <= from) continue;
+    if (candidateTarget <= from) continue;
 
-    if (repeat === "once" || repeat === "daily") return candidate;
+    if (repeat !== "once" && repeat !== "daily") {
+      const day = candidateTarget.getDay();
+      if (repeat === "weekdays" && (day < 1 || day > 5)) continue;
+      if (repeat === "weekends" && day !== 0 && day !== 6) continue;
+      if (repeat === "custom" && (!Array.isArray(days) || !days.includes(day))) continue;
+    }
 
-    const day = candidate.getDay();
-    if (repeat === "weekdays" && day >= 1 && day <= 5) return candidate;
-    if (repeat === "weekends" && (day === 0 || day === 6)) return candidate;
-    if (repeat === "custom" && Array.isArray(days) && days.includes(day)) return candidate;
+    const triggerAt = new Date(candidateTarget.getTime() - leadMs);
+    if (triggerAt <= from) continue;
+    return triggerAt;
   }
 
   return null;
+}
+
+function getLeadMs(item) {
+  if (item?.isRelativeInput) return 0;
+  if (item?.leadEnabled !== true) return 0;
+  if (!Number.isFinite(item?.leadSeconds)) return 0;
+  return Math.max(0, Math.floor(item.leadSeconds) * 1000);
 }
 
 export function defaultDaysForRepeat(repeat) {

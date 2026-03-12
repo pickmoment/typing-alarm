@@ -104,6 +104,9 @@ async function rescheduleAll() {
     item.nextAt = next ? next.getTime() : null;
     if (item.nextAt) {
       chrome.alarms.create(`alarm:${item.id}`, { when: item.nextAt });
+    } else if (item.enabled !== false && item.oneOffAt) {
+      item.enabled = false;
+      item.oneOffAt = null;
     }
   }
 
