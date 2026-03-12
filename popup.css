@@ -1,0 +1,393 @@
+:root {
+  --bg: #f6f1ea;
+  --panel: #ffffff;
+  --text: #2a2622;
+  --muted: #6d655c;
+  --accent: #d24b1c;
+  --accent-2: #1b7f7a;
+  --border: #e2d6c8;
+  --shadow: 0 10px 30px rgba(25, 20, 15, 0.12);
+  font-family: "IBM Plex Sans", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #fff9f2 0%, #f2e7dc 60%, #efe0d2 100%);
+  color: var(--text);
+}
+
+.app {
+  width: 360px;
+  padding: 16px;
+}
+
+.alarm-banner {
+  background: linear-gradient(135deg, #ffedd5, #ffe4c7);
+  border: 2px solid #f3b089;
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.alarm-title {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.alarm-countdown {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.alarm-now {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.alarm-stop {
+  width: 100%;
+  font-size: 14px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #c6251a;
+  color: white;
+  font-weight: 700;
+}
+
+.toast {
+  width: 100%;
+  text-align: center;
+  margin-top: 8px;
+  background: rgba(31, 26, 22, 0.92);
+  color: #fff7ef;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.toast.show {
+  opacity: 1;
+}
+
+.top h1 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  letter-spacing: 0.3px;
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.title-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.subtitle {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.input-panel,
+.list-panel,
+.settings-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: var(--shadow);
+}
+
+.input-panel {
+  margin-top: 8px;
+  margin-bottom: 12px;
+}
+
+.settings-panel {
+  margin-bottom: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.settings-row {
+  display: grid;
+  grid-template-columns: 1fr 100px;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.settings-row input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px 6px;
+  font-size: 12px;
+  background: white;
+}
+
+.label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.label-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  position: relative;
+}
+
+.tooltip-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #f5ede3;
+  color: var(--text);
+  font-weight: 700;
+  line-height: 1;
+  padding: 0;
+}
+
+.tooltip {
+  position: absolute;
+  top: 28px;
+  right: 0;
+  width: 260px;
+  background: #1f1a16;
+  color: #fff7ef;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 11px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+.tooltip-title {
+  font-weight: 700;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+.tooltip::after {
+  content: "";
+  position: absolute;
+  top: -6px;
+  right: 12px;
+  width: 12px;
+  height: 12px;
+  background: #1f1a16;
+  transform: rotate(45deg);
+}
+
+textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px;
+  resize: vertical;
+  font-size: 13px;
+  background: #fffefc;
+}
+
+.quick-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.quick {
+  background: #f5ede3;
+  color: var(--text);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11px;
+}
+
+.quick-panel {
+  margin-top: 8px;
+}
+
+.quick-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.quick-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f5ede3;
+  border-radius: 999px;
+  padding: 4px 6px;
+}
+
+.quick-item button {
+  background: transparent;
+  padding: 2px 6px;
+  font-size: 11px;
+}
+
+.quick-delete {
+  background: #f8d9d2;
+  color: #7a1f1f;
+  border-radius: 999px;
+  width: 18px;
+  height: 18px;
+  line-height: 1;
+  padding: 0;
+  font-weight: 700;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+button {
+  border: none;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+button.primary {
+  background: var(--accent);
+  color: white;
+  font-weight: 600;
+}
+
+button.ghost {
+  background: #f5ede3;
+  color: var(--text);
+}
+
+button.delete {
+  background: #f8d9d2;
+}
+
+button.save {
+  background: #e0f1ef;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.error {
+  color: #b32727;
+  font-size: 11px;
+}
+
+.list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.list-header h2 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.item {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px;
+  background: #fffdf8;
+}
+
+.item-main {
+  display: grid;
+  grid-template-columns: 1.1fr 1.4fr 0.9fr 0.7fr;
+  gap: 6px;
+  align-items: center;
+}
+
+.item-main input,
+.item-main select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px 6px;
+  font-size: 12px;
+  background: white;
+}
+
+.item-sub {
+  margin-top: 8px;
+  display: grid;
+  gap: 6px;
+}
+
+.days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 11px;
+}
+
+.days[hidden] {
+  display: none !important;
+}
+
+.days label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--muted);
+}

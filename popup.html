@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Typing Alarm</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <main class="app">
+    <section id="alarmBanner" class="alarm-banner" hidden>
+      <div class="alarm-title" id="alarmTitleText">알람 울림 중</div>
+      <div id="alarmNow" class="alarm-now"></div>
+      <div id="alarmCountdown" class="alarm-countdown"></div>
+      <button id="alarmStopBtn" class="alarm-stop">알람 끄기</button>
+    </section>
+    <header class="top">
+      <div class="title-row">
+        <img class="title-icon" src="icons/icon48.png" alt="Typing Alarm" />
+        <h1>Typing Alarm</h1>
+      </div>
+    </header>
+
+    <section class="input-panel">
+      <div class="label-row">
+        <label for="timeInput" class="label">시간 입력</label>
+        <button id="usageBtn" class="tooltip-btn" aria-label="사용 방법" type="button">?</button>
+        <div id="usageTooltip" class="tooltip" role="tooltip" hidden>
+          <div class="tooltip-title">사용방법</div>
+          <div class="tooltip-body">
+            형식 예시: 9 / 09:30 / 9:30am / 21 / 930 / 9시30분 / 9:30:15 / 93015
+            <br />
+            경과시간: 20분후, 1시간후, 1시간 20분후, 1분10초후
+            <br />
+            날짜: 내일 9시, 2/12 9:30, 2026-02-12 09:30
+            <br />
+            여러 개: 콤마 또는 줄바꿈
+            <br />
+            Enter: 추가 / Shift+Enter: 줄바꿈
+            <br />
+            문구 등록: 입력 후 '문구 등록' 버튼 클릭
+          </div>
+        </div>
+      </div>
+      <textarea id="timeInput" rows="3" placeholder="예: 9, 09:30, 9:30am, 21, 930, 9시30분, 9:30:15, 93015, 20분후, 1분10초후, 1시간후, 내일 9시, 2/12 9:30"></textarea>
+      <div class="quick-panel">
+        <div class="quick-header">
+          <span class="hint">자주 쓰는 문구</span>
+          <button id="quickAddBtn" class="ghost" type="button">문구 등록</button>
+        </div>
+        <div id="quickList" class="quick-row"></div>
+        <div id="quickHint" class="hint"></div>
+      </div>
+      <div id="toast" class="toast" hidden></div>
+      <div id="addError" class="error" hidden></div>
+    </section>
+
+    <section class="settings-panel">
+      <div class="list-header">
+        <h2>알람 설정</h2>
+      </div>
+      <div class="settings-row">
+        <label for="durationInput">지속 시간(초)</label>
+        <input id="durationInput" type="number" min="5" max="900" step="5" />
+      </div>
+      <div class="settings-row">
+        <label for="intervalInput">소리 간격(초)</label>
+        <input id="intervalInput" type="number" min="1" max="30" step="1" />
+      </div>
+      <button id="saveSettingsBtn" class="ghost">설정 저장</button>
+      <div id="settingsHint" class="hint"></div>
+    </section>
+
+    <section class="list-panel">
+      <div class="list-header">
+        <h2>알람 목록</h2>
+        <button id="refreshBtn" class="ghost">새로고침</button>
+      </div>
+      <div id="list" class="list"></div>
+    </section>
+  </main>
+
+  <template id="itemTemplate">
+      <div class="item">
+      <div class="item-main">
+        <input class="time" type="text" />
+        <input class="message" type="text" placeholder="알람 메시지" />
+        <select class="repeat">
+          <option value="once">한 번</option>
+          <option value="daily">매일</option>
+          <option value="weekdays">평일</option>
+          <option value="weekends">주말</option>
+          <option value="custom">요일 선택</option>
+        </select>
+        <label class="toggle">
+          <input type="checkbox" class="enabled" />
+          <span>활성</span>
+        </label>
+      </div>
+      <div class="item-sub">
+        <div class="days" hidden>
+          <label><input type="checkbox" value="0" />일</label>
+          <label><input type="checkbox" value="1" />월</label>
+          <label><input type="checkbox" value="2" />화</label>
+          <label><input type="checkbox" value="3" />수</label>
+          <label><input type="checkbox" value="4" />목</label>
+          <label><input type="checkbox" value="5" />금</label>
+          <label><input type="checkbox" value="6" />토</label>
+        </div>
+        <div class="meta">
+          <span class="next"></span>
+          <span class="error" hidden></span>
+        </div>
+        <div class="actions">
+          <button class="save">저장</button>
+          <button class="delete">삭제</button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
