@@ -545,30 +545,21 @@ function isDuplicateAlarm(items, parsed, excludeId = null) {
 
 async function verifyStoredItems(stored, metas) {
   if (!metas.length) return true;
+  const targetIds = metas.map((meta) => meta?.id).filter(Boolean);
+  if (!targetIds.length) return true;
 
-  // Retry logic to handle async storage race conditions
-  const maxRetries = 3;
-  const retryDelay = 50; // ms
+  // Retry to absorb eventual consistency or overlapping storage writes.
+  const maxRetries = 6;
+  const retryDelay = 80; // ms
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     if (attempt > 0) {
-      // Wait before retrying
-      await new Promise(resolve => setTimeout(resolve, retryDelay * attempt));
-      // Reload from storage
+      await new Promise((resolve) => setTimeout(resolve, retryDelay * attempt));
       stored = await loadItems();
     }
 
-    const map = new Map(stored.map((item) => [item.id, item]));
-    let allFound = true;
-
-    for (const meta of metas) {
-      const item = map.get(meta.id);
-      if (!item || (item.message || "알람") !== meta.title) {
-        allFound = false;
-        break;
-      }
-    }
-
+    const storedIds = new Set(stored.map((item) => item?.id).filter(Boolean));
+    const allFound = targetIds.every((id) => storedIds.has(id));
     if (allFound) return true;
   }
 

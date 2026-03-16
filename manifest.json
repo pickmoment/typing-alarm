@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Typing Alarm",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Type times to set alarms with messages, repeats, and flexible formats.",
   "action": {
     "default_popup": "popup.html",
