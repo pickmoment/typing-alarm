@@ -94,9 +94,18 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   await saveItems(items);
 });
 
+async function clearScheduledItemAlarms() {
+  const all = await chrome.alarms.getAll();
+  for (const alarm of all) {
+    if (alarm.name.startsWith("alarm:")) {
+      await chrome.alarms.clear(alarm.name);
+    }
+  }
+}
+
 async function rescheduleAll() {
   const items = await loadItems();
-  await chrome.alarms.clearAll();
+  await clearScheduledItemAlarms();
 
   const now = new Date();
   for (const item of items) {

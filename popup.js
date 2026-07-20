@@ -423,8 +423,17 @@ async function saveItems(items) {
   await chrome.storage.local.set({ [STORAGE_KEY]: items });
 }
 
+async function clearScheduledItemAlarms() {
+  const all = await chrome.alarms.getAll();
+  for (const alarm of all) {
+    if (alarm.name.startsWith("alarm:")) {
+      await chrome.alarms.clear(alarm.name);
+    }
+  }
+}
+
 async function rescheduleLocal(items) {
-  await chrome.alarms.clearAll();
+  await clearScheduledItemAlarms();
   const now = new Date();
   for (const item of items) {
     const next = computeNextOccurrence(item, now);
